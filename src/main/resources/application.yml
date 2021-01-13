@@ -1,0 +1,26 @@
+server:
+  port: 18090
+
+spring:
+  application:
+    name: light-lpr-web
+  datasource:
+    url: jdbc:mysql://localhost:3306/xhai?useSSL=FALSE
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+  flyway:
+    schemas:
+      - xhai
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+swt:
+  server: 192.168.1.104
+  port: 50051
