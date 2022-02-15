@@ -27,8 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 public class DemoAPI {
 	
-	static Logger logger = LoggerFactory.getLogger(DemoAPI.class.getName());
-	
+	static Logger logger = LoggerFactory.getLogger(DemoAPI.class.getName());	
 	@PostMapping( value = "/licensePlateInfoAction", 
 			produces = "application/json;charset=UTF-8")
 	@ResponseBody	
@@ -75,31 +74,37 @@ public class DemoAPI {
 		
 		//时间戳，从1970-01-01开始的秒数
 		logger.info("timestamp: {}", licensePlateInfo.get("timestamp"));
+
+		//停车区域编号，左边第一个为0，依次累加
+		logger.info("zoneIndex: {}", licensePlateInfo.get("zoneIndex"));
+
+		//停车状态， 1 驶入 2 停稳 3 驶离
+		logger.info("parkStat: {}", licensePlateInfo.get("parkStat"));
 		
-		//base64编码的图像
+		//base64编码的图像		
 		String base64Image = (String) licensePlateInfo.get("base64image");
-		byte[] bytes = Base64.getDecoder().decode(base64Image);
-		
-		String fileName = licensePlateInfo.get("fileName").toString();
-		try {			
-			int i = fileName.lastIndexOf("/");
-			if (i != -1) {
-				Path dir = Paths.get(fileName.substring(0, i));
-				if (!Files.exists(dir)) {
-					Files.createDirectories(dir);
-				}
-			}
-			
-			OutputStream os = Files.newOutputStream(Paths.get(fileName));
-			os.write(bytes);
-			os.flush();
-			os.close();
-		} catch (IOException e) { 
-			e.printStackTrace();
+		if (base64Image != null) {
+			byte[] bytes = Base64.getDecoder().decode(base64Image);		
+			String fileName = licensePlateInfo.get("fileName").toString();
+			try {			
+				int i = fileName.lastIndexOf("/");
+				if (i != -1) {
+					Path dir = Paths.get(fileName.substring(0, i));
+					if (!Files.exists(dir)) {
+						Files.createDirectories(dir);
+					}
+				}			
+				OutputStream os = Files.newOutputStream(Paths.get(fileName));
+				os.write(bytes);
+				os.flush();
+				os.close();
+			} catch (IOException e) { 
+				e.printStackTrace();
+			}	
 		}
 		
 		//返回success，告诉相机服务端处理成功，否则认为处理不成功
-		return "success";
+		return "{\"status\": \"OK\", \"sbody\": { \"comment\": \"information to camera ...\"}}";
 	}
 
 }
