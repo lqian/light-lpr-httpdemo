@@ -32,8 +32,7 @@ public class DemoAPI {
 			produces = "application/json;charset=UTF-8")
 	@ResponseBody	
 	@CrossOrigin
-	public String licensePlateInfoAction(@RequestBody Map<String, Object> licensePlateInfo) {	
-		
+	public String licensePlateInfoAction(@RequestBody Map<String, Object> licensePlateInfo) {	 
 		//产品序列号
 		logger.info("productNo: {}", licensePlateInfo.get("productNo"));
 		//固件代号
@@ -48,63 +47,79 @@ public class DemoAPI {
 		//设备IP
 		logger.info("ip: {}", licensePlateInfo.get("ip"));
 		
-		//图片文件名
-		logger.info("fileName: {}", licensePlateInfo.get("fileName"));
-		
-		//车牌识别置信度
-		logger.info("confidence: {}", licensePlateInfo.get("confidence"));
-		
-		//车牌号码
-		logger.info("plateNo: {}", licensePlateInfo.get("plateNo"));
-		
-		 //车牌颜色： 未知、白、黄、蓝、黑、绿、黄绿
-		logger.info("plateColor: {}", licensePlateInfo.get("plateColor"));
-		
-		//车牌类型
-		//10 军 11 双层军牌 12 武警 13 双层武警牌 14 警 15 应急 16 新电动车
-		//20 货车 21 教练车牌 22 双层黄牌 23 挂车车牌
-		//30 蓝色小汽车
-		//40 使馆牌 41 领馆牌 42 粤港澳牌 43 黑色小汽车
-		//50 民航 51 新能源 52 农用车牌 53 电动车牌（非机动）
-		//60 大型新能源
-		logger.info("plateType: {}", licensePlateInfo.get("plateType"));
-		
-		//车牌位置 {xmin, ymin, xmax, ymax}JSON对象
-		logger.info("platePosition: {}", licensePlateInfo.get("platePosition"));
-		
-		//时间戳，从1970-01-01开始的秒数
-		logger.info("timestamp: {}", licensePlateInfo.get("timestamp"));
+		//载荷类型 0 心跳， 1 停车事件， 若缺失，默认为停车事件
+		Object payloadType = licensePlateInfo.get("payloadType")
+		logger.info("payloadType: {}", payloadType)
 
-		//停车区域编号，左边第一个为0，依次累加
-		logger.info("zoneIndex: {}", licensePlateInfo.get("zoneIndex"));
-
-		//停车状态， 1 驶入 2 停稳 3 驶离
-		logger.info("parkStat: {}", licensePlateInfo.get("parkStat"));
+		if (payloadType == null || payloadType.equals("1")) 
+		{
+			//图片文件名
+			logger.info("fileName: {}", licensePlateInfo.get("fileName"));
 		
-		//base64编码的图像		
-		String base64Image = (String) licensePlateInfo.get("base64image");
-		if (base64Image != null) {
-			byte[] bytes = Base64.getDecoder().decode(base64Image);		
-			String fileName = licensePlateInfo.get("fileName").toString();
-			try {			
-				int i = fileName.lastIndexOf("/");
-				if (i != -1) {
-					Path dir = Paths.get(fileName.substring(0, i));
-					if (!Files.exists(dir)) {
-						Files.createDirectories(dir);
-					}
-				}			
-				OutputStream os = Files.newOutputStream(Paths.get(fileName));
-				os.write(bytes);
-				os.flush();
-				os.close();
-			} catch (IOException e) { 
-				e.printStackTrace();
-			}	
+			//车牌识别置信度
+			logger.info("confidence: {}", licensePlateInfo.get("confidence"));
+		
+			//车牌号码
+			logger.info("plateNo: {}", licensePlateInfo.get("plateNo"));
+		
+		 	//车牌颜色： 未知、白、黄、蓝、黑、绿、黄绿
+			logger.info("plateColor: {}", licensePlateInfo.get("plateColor"));
+		
+			//车牌类型
+			//10 军 11 双层军牌 12 武警 13 双层武警牌 14 警 15 应急 16 新电动车
+			//20 货车 21 教练车牌 22 双层黄牌 23 挂车车牌
+			//30 蓝色小汽车
+			//40 使馆牌 41 领馆牌 42 粤港澳牌 43 黑色小汽车
+			//50 民航 51 新能源 52 农用车牌 53 电动车牌（非机动）
+			//60 大型新能源
+			logger.info("plateType: {}", licensePlateInfo.get("plateType"));
+			
+			//车牌位置 {xmin, ymin, xmax, ymax}JSON对象
+			logger.info("platePosition: {}", licensePlateInfo.get("platePosition"));
+			
+			//时间戳，从1970-01-01开始的秒数
+			logger.info("timestamp: {}", licensePlateInfo.get("timestamp"));
+	
+			//停车区域编号，左边第一个为0，依次累加
+			logger.info("zoneIndex: {}", licensePlateInfo.get("zoneIndex"));
+	
+			//停车状态， 1 驶入 2 停稳 3 驶离
+			logger.info("parkState: {}", licensePlateInfo.get("parkState"));
+			
+			//base64编码的图像		
+			String base64Image = (String) licensePlateInfo.get("base64image");
+			if (base64Image != null) {
+				byte[] bytes = Base64.getDecoder().decode(base64Image);		
+				String fileName = licensePlateInfo.get("fileName").toString();
+				try {			
+					int i = fileName.lastIndexOf("/");
+					if (i != -1) {
+						Path dir = Paths.get(fileName.substring(0, i));
+						if (!Files.exists(dir)) {
+							Files.createDirectories(dir);
+						}
+					}			
+					OutputStream os = Files.newOutputStream(Paths.get(fileName));
+					os.write(bytes);
+					os.flush();
+					os.close();
+				} catch (IOException e) { 
+					e.printStackTrace();
+				}	
+			}
 		}
+		String content = Base64.getEncoder().encodeToString(new byte[] {0x1, 0x2, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09});
+		//返回的json串中的status为OK认为是处理成功，否则相机端丢弃
+		return String.format("{\"status\": \"OK\",  \"comment\": \"information to camera ...\","
+			+ "\"sbody\": ["
+			+"{\"cmd\": \"getphoto\"}, "
+			+"{\"cmd\": \"led\", \"cindex\": 1}, "
+			+"{\"cmd\": \"music\", \"cindex\": 1}, "
+			+"{\"cmd\": \"serial0\", \"content\": \"%s\"}, "
+			+"{\"cmd\": \"serial1\", \"content\": \"%s\"}, "
+			+"{\"cmd\": \"serial2\", \"content\": \"%s\"}"
+			+"]}", content, content, content);
 		
-		//返回success，告诉相机服务端处理成功，否则认为处理不成功
-		return "{\"status\": \"OK\", \"sbody\": { \"comment\": \"information to camera ...\"}}";
 	}
 
 }
