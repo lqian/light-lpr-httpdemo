@@ -83,8 +83,12 @@ public class DemoAPI {
 			//停车区域编号，左边第一个为0，依次累加
 			logger.info("zoneIndex: {}", licensePlateInfo.get("zoneIndex"));
 	
-			//停车状态， 1 驶入 2 停稳 3 驶离
+			//路侧停车桩，状态， 1 驶入 2 停稳 3 驶离 	4 空场
+			// 新能源充电桩：    11 进场 12 停稳 13 出场  14 空场
 			logger.info("parkState: {}", licensePlateInfo.get("parkState"));
+
+			// 3.29.07版本固件开始支持抓拍时发送msg，固件收到msg后，透传给接收端和云端
+			logger.info("msg: {}", licensePlateInfo.get("msg"));
 			
 			//base64编码的图像		
 			String base64Image = (String) licensePlateInfo.get("base64image");
@@ -109,11 +113,12 @@ public class DemoAPI {
 			}
 		}
 		String content = Base64.getEncoder().encodeToString(new byte[] {0x1, 0x2, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09});
-		//返回的json串中的status为OK认为是处理成功，否则相机端丢弃
+		//返回的json串中的status为OK认为是处理成功，否则相机端丢弃		
 		return String.format("{\"status\": \"OK\",  \"comment\": \"information to camera ...\","
 			+ "\"sbody\": ["
 			+"{\"cmd\": \"getphoto\"}, "
-			+"{\"cmd\": \"led\", \"cindex\": 1}, "
+			+"{\"cmd\": \"led\", \"cindex\": 1, \"text\": \"皖AJ001Z\"}, "
+			+"{\"cmd\": \"led\", \"cindex\": 2, \"text\": \"请缴费10元\"}, "
 			+"{\"cmd\": \"music\", \"cindex\": 1}, "
 			+"{\"cmd\": \"serial0\", \"content\": \"%s\"}, "
 			+"{\"cmd\": \"serial1\", \"content\": \"%s\"}, "
