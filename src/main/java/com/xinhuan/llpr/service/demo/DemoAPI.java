@@ -33,10 +33,20 @@ public class DemoAPI {
 	@ResponseBody	
 	@CrossOrigin
 	public String licensePlateInfoAction(@RequestBody Map<String, Object> licensePlateInfo) {	 
+
+		// 产品名称，采用产品基线代号，产品类型，国家地区代码，ANCHOR BOX个数形式组成
+		// LLPR表示停车管理相关的产品基线
+		// 产品类型有 E5, E5L, Z1，Z1E，P4，P4S, P4L, G1, F4，V3 ...
+		// 目前支持的国家地区代码有CN TW KR
+		// 比如：LLPR-E5-CN-1表示适用于中国大陆地区的出入口识别相机，识别一个区域
+		logger.info("productName: {}", licensePlateInfo.get("productName"));
+		
 		//产品序列号
 		logger.info("productNo: {}", licensePlateInfo.get("productNo"));
-		//固件代号
+
+		//固件代号,比如light-lpr-ssc-cn light-lpr-his-cn ...
 		logger.info("firmware: {}", licensePlateInfo.get("firmware"));
+		
 		//固件版本
 		logger.info("version: {}", licensePlateInfo.get("version"));
 		//次版本号
@@ -48,11 +58,9 @@ public class DemoAPI {
 		logger.info("ip: {}", licensePlateInfo.get("ip"));
 		
 		//载荷类型 0 心跳， 1 停车事件， 若缺失，默认为停车事件
-		Object payloadType = licensePlateInfo.get("payloadType")
-		logger.info("payloadType: {}", payloadType)
-
-		if (payloadType == null || payloadType.equals("1")) 
-		{
+		Object payloadType = licensePlateInfo.get("payloadType");
+		logger.info("payloadType: {}", payloadType);
+		 
 			//图片文件名
 			logger.info("fileName: {}", licensePlateInfo.get("fileName"));
 		
@@ -80,14 +88,18 @@ public class DemoAPI {
 			//时间戳，从1970-01-01开始的秒数
 			logger.info("timestamp: {}", licensePlateInfo.get("timestamp"));
 	
-			//停车区域编号，左边第一个为0，依次累加
+			//停车位序号，左边第一个为0，依次累加
 			logger.info("zoneIndex: {}", licensePlateInfo.get("zoneIndex"));
+
+			//停车位编号
+			logger.info("zoneCode: {}", licensePlateInfo.get("zoneCode"));
 	
-			//路侧停车桩，状态， 1 驶入 2 停稳 3 驶离 	4 空场
+			// 路侧停车桩，状态， 1 驶入 2 停稳 3 驶离 	4 空场
 			// 新能源充电桩：    11 进场 12 停稳 13 出场  14 空场
 			logger.info("parkState: {}", licensePlateInfo.get("parkState"));
 
 			// 3.29.07版本固件开始支持抓拍时发送msg，固件收到msg后，透传给接收端和云端
+			// 4.x不支持此字段
 			logger.info("msg: {}", licensePlateInfo.get("msg"));
 			
 			//base64编码的图像		
@@ -111,7 +123,7 @@ public class DemoAPI {
 					e.printStackTrace();
 				}	
 			}
-		}
+		
 		String content = Base64.getEncoder().encodeToString(new byte[] {0x1, 0x2, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09});
 		//返回的json串中的status为OK认为是处理成功，否则相机端丢弃		
 		return String.format("{\"status\": \"OK\",  \"comment\": \"information to camera ...\","
@@ -126,5 +138,4 @@ public class DemoAPI {
 			+"]}", content, content, content);
 		
 	}
-
 }
